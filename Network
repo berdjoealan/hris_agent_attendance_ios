@@ -1,0 +1,49 @@
+import SwiftUI
+import WebKit
+
+struct WebView: UIViewRepresentable {
+    var urlString: String
+    @Binding var isLoading: Bool
+    @Binding var isRefreshing: Bool
+    let webView = WKWebView()
+    
+    func makeUIView(context: Context) -> WKWebView {
+        let request = URLRequest(url: URL(string: urlString)!)
+        webView.navigationDelegate = context.coordinator
+        webView.load(request)
+        return webView
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        if isRefreshing {
+            uiView.reload()
+            isRefreshing = false
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(isLoading: $isLoading)
+    }
+    
+    class Coordinator: NSObject, WKNavigationDelegate {
+        @Binding var isLoading: Bool
+        
+        init(isLoading: Binding<Bool>) {
+            _isLoading = isLoading
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            isLoading = false
+        }
+        
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            isLoading = true
+        }
+    }
+}
+  
+extension WKWebView {
+    override open var safeAreaInsets: UIEdgeInsets {
+        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+}
