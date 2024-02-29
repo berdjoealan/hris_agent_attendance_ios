@@ -1,0 +1,68 @@
+import SwiftUI
+import WebKit
+
+
+struct ContentView: View {
+    
+ 
+    @State private var isLoading = false
+    @State private var isRefreshing = false
+    @State private var urlString = "https://hristaspen-494847.ingress-earth.ewp.live/my-account/?login=true&page=1&redirect_to=https%3A%2F%2Fhristaspen-494847.ingress-earth.ewp.live%2F" // Your website URL
+
+    @StateObject var network = Network()
+    
+    struct GrowingButton: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .font(.largeTitle)
+                .padding()
+                .padding()
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+                .scaleEffect(configuration.isPressed ? 1.2 : 1)
+                .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+        }
+    }
+    
+    func reload() {
+       _ = network.checkConnection()
+    }
+    
+    let defaults = UserDefaults.standard;
+    
+    var body: some View {
+        ZStack {
+             
+            if (true) {
+                WebView(urlString: urlString, isLoading: $isLoading, isRefreshing: $isRefreshing)
+                
+                if isLoading {
+                    Color.white.opacity(0.6) // Semi-transparent overlay
+                                        .edgesIgnoringSafeArea(.all)
+                                        .transition(.opacity)
+                                    
+                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: Color(#colorLiteral(red: 0.003921568627, green: 0.4784313725, blue: 1, alpha: 1))))
+                                        .scaleEffect(1.5, anchor: .center)
+                                        .transition(.opacity)
+                                }
+            }
+        }
+        .edgesIgnoringSafeArea(.vertical)
+        .onAppear {
+            isLoading = true // Simulate initial loading
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                isLoading = false // Hide loading screen after 2 seconds (simulating splash screen)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
